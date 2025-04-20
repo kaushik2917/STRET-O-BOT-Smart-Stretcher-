@@ -1,0 +1,87 @@
+// Define motor pins
+#define IN1 7
+#define IN2 6
+#define IN3 5
+#define IN4 4
+#define ENA 9
+#define ENB 10
+
+// Define ultrasonic sensor pins
+#define trigPin1 12
+#define echoPin1 13
+
+// Variables for distance measuring
+long duration, distance;
+
+void setup() {
+  // Initialize motor pins as OUTPUT
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+
+  // Initialize ultrasonic sensor pins
+  pinMode(trigPin1, OUTPUT);
+  pinMode(echoPin1, INPUT);
+
+  // Start serial communication for debugging
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Measure distance using ultrasonic sensor
+  digitalWrite(trigPin1, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin1, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin1, LOW);
+  duration = pulseIn(echoPin1, HIGH);
+  distance = duration * 0.0344 / 2; // Calculate distance in cm
+
+  // Display the distance in serial monitor
+  Serial.print("Distance: ");
+  Serial.println(distance);
+
+  // If obstacle detected within 20 cm, stop and reverse
+  if (distance < 20) {
+    stopMovement();
+    delay(1000); // Wait for 1 second
+    reverseMovement();
+    delay(1000); // Move back for 1 second
+    stopMovement();
+  } else {
+    moveForward(); // Continue moving forward
+  }
+}
+
+// Function to move the stretcher forward
+void moveForward() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 255);  // Full speed
+  analogWrite(ENB, 255);  // Full speed
+}
+
+// Function to stop the stretcher
+void stopMovement() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 0);
+  analogWrite(ENB, 0);
+}
+
+// Function to reverse the stretcher
+void reverseMovement() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 255);
+  analogWrite(ENB, 255);
+}
